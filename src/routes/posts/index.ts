@@ -6,7 +6,10 @@ import type { PostEntity } from '../../utils/DB/entities/DBPosts';
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
-  fastify.get('/', async function (request, reply): Promise<PostEntity[]> {});
+  fastify.get('/', async function (request, reply): Promise<PostEntity[]> {
+    const posts = await fastify.db.posts.findMany();
+    return posts;
+  });
 
   fastify.get(
     '/:id',
@@ -15,7 +18,12 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {}
+    async function (request, reply): Promise<PostEntity> {
+      const postID = request.params.id;
+      const posts = await fastify.db.posts.findOne({ key: 'id', equals: postID });
+      if (!posts) throw fastify.httpErrors.notFound();
+      return posts;
+    }
   );
 
   fastify.post(
@@ -25,7 +33,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         body: createPostBodySchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {}
+    async function (request, reply): Promise<PostEntity> {
+      const postData = request.body;
+      const newPost = await fastify.db.posts.create(postData);
+      return newPost;
+    }
   );
 
   fastify.delete(
@@ -35,7 +47,13 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {}
+    async function (request, reply): Promise<PostEntity> {
+      const postID = request.params.id;
+      const postForDelete = await fastify.db.posts.findOne({ key: 'id', equals: postID });
+      if (!postForDelete) throw fastify.httpErrors.badRequest();
+      const deletedPost = await fastify.db.posts.delete(postID);
+      return deletedPost;
+    }
   );
 
   fastify.patch(
@@ -46,7 +64,13 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {}
+    async function (request, reply): Promise<PostEntity> {
+      const postID = request.params.id;
+      const postForDelete = await fastify.db.posts.findOne({ key: 'id', equals: postID });
+      if (!postForDelete) throw fastify.httpErrors.badRequest();
+      const changedPost = await fastify.db.posts.change(postID, request.body);
+      return changedPost;
+    }
   );
 };
 
