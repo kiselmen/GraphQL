@@ -40,6 +40,7 @@
     "@types/lodash": "^4.14.188",
     "@types/node": "^18.0.0",
     "@types/tap": "^15.0.5",
+    "@types/uuid": "^9.0.0",
     "concurrently": "^7.0.0",
     "fastify-tsconfig": "^1.0.1",
     "tap": "^16.1.0",
